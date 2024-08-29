@@ -100,15 +100,15 @@ class Panel_Discussion(db.Model):
     panel_list = db.Column(db.Text)  # List of panelists, can be stored as a string or JSON
     video_file_path = db.Column(db.String(255))
 
-   admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
 # Interview Table
 class Interview(db.Model):
 
-    __tablename__ = '
+    __tablename__ = 'Interview'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     image_url = db.Column(db.String(255), nullable=False)
 
-   admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
