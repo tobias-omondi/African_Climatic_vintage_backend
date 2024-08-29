@@ -56,7 +56,7 @@ class Podcast(db.Model):
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Panel Discussion Table
-class PanelDiscussion(db.Model):
+class Panel_Discussion(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
