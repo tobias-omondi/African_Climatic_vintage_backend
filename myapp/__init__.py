@@ -6,11 +6,14 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView # when to use when creating crud application for your database
 # from flask_admin.base import AdminIndexView
 # from flask_admin import form
-# from flask_admin import expose
+# from flask_admin import exposeS
+from flask_basicauth import BasicAuth
 
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
+basic_auth = BasicAuth(app)
+
 
 
 def create_app():
@@ -19,6 +22,10 @@ def create_app():
     # Configure SQLite database
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Africa_climatic_database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+       # Configure BasicAuth
+    app.config['BASIC_AUTH_USERNAME'] = 'admin'
+    app.config['BASIC_AUTH_PASSWORD'] = 'password'
 
     # Initialize extensions
     db.init_app(app)
