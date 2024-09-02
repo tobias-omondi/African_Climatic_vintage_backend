@@ -3,14 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla import ModelView # when to use when creating crud application for your database
+# from flask_admin.base import AdminIndexView
+# from flask_admin import form
+# from flask_admin import expose
 
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
-
-admin = Admin(app, name='microblog', theme=Bootstrap4Theme(swatch='cerulean'))
-# Add administrative views here
 
 
 def create_app():
@@ -27,13 +27,34 @@ def create_app():
 
     # Import models
     import myapp.models
+    User, News, Documentation, PanelDiscussion, Interview, AdminModel, Multimedia, Podcast = (
+        myapp.models.User,
+        myapp.models.News,
+        myapp.models.Documentation,
+        myapp.models.PanelDiscussion,
+        myapp.models.Interview,
+        myapp.models.Admin,
+        myapp.models.Multimedia,
+        myapp.models.Podcast,
+    )
 
+    # Flask and Flask-SQLAlchemy initialization here
+    admin = Admin(app, name='microblog', template_mode='bootstrap4')
+    
+    # Add administrative views here
+    admin.add_view(ModelView(User, db.session))
+    admin.add_view(ModelView(News, db.session))
+    admin.add_view(ModelView(Documentation, db.session))
+    admin.add_view(ModelView(Multimedia, db.session))
+    admin.add_view(ModelView(Podcast, db.session))
+    admin.add_view(ModelView(PanelDiscussion, db.session))
+    admin.add_view(ModelView(Interview, db.session))
+
+    # Create tables if they don't exist
     with app.app_context():
-        User, News, Documentation, PanelDiscussion, Interview, Admin, Multimedia, Podcast = \
-            myapp.models.User, myapp.models.News, myapp.models.Documentation, myapp.models.PanelDiscussion, \
-            myapp.models.Interview, myapp.models.Admin, myapp.models.Multimedia, myapp.models.Podcast
-
-        # Create tables if they don't exist
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Error creating tables: {e}")
 
     return app
