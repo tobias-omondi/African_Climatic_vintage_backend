@@ -1,12 +1,9 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
+# models.py
+from myapp import db, bcrypt
 from datetime import datetime
 from sqlalchemy.orm import validates
 import re
 from sqlalchemy_serializer import SerializerMixin
-
-db = SQLAlchemy()
-bcrypt = Bcrypt()
 
 # User Table
 class User(db.Model, SerializerMixin):
@@ -20,7 +17,6 @@ class User(db.Model, SerializerMixin):
 
     @validates('email')
     def validate_email(self, key, email):
-        # Basic email validation
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             raise ValueError("Invalid email address")
         return email
@@ -31,7 +27,6 @@ class User(db.Model, SerializerMixin):
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
 
-
 # Admin Table
 class Admin(db.Model, SerializerMixin):
     __tablename__ = 'admin'
@@ -40,7 +35,6 @@ class Admin(db.Model, SerializerMixin):
     username = db.Column(db.String(55), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
 
-    # Relationships
     news = db.relationship('News', backref='admin', lazy=True)
     documentation = db.relationship('Documentation', backref='admin', lazy=True)
     multimedia = db.relationship('Multimedia', backref='admin', lazy=True)
@@ -72,7 +66,6 @@ class News(db.Model, SerializerMixin):
             raise ValueError("Title must be at least 5 characters long")
         return title
 
-
 # Documentation Table
 class Documentation(db.Model, SerializerMixin):
     __tablename__ = 'documentation'
@@ -93,7 +86,6 @@ class Documentation(db.Model, SerializerMixin):
         if content_type.upper() not in allowed_types:
             raise ValueError(f"Content type must be one of {', '.join(allowed_types)}")
         return content_type
-
 
 # Multimedia Table
 class Multimedia(db.Model, SerializerMixin):
@@ -116,7 +108,6 @@ class Multimedia(db.Model, SerializerMixin):
             raise ValueError(f"Content type must be one of {', '.join(allowed_types)}")
         return content_type
 
-
 # Podcast Table
 class Podcast(db.Model, SerializerMixin):
     __tablename__ = 'podcast'
@@ -129,7 +120,6 @@ class Podcast(db.Model, SerializerMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-
 # Panel Discussion Table
 class PanelDiscussion(db.Model, SerializerMixin):
     __tablename__ = 'paneldiscussion'
@@ -141,7 +131,6 @@ class PanelDiscussion(db.Model, SerializerMixin):
     video_file_path = db.Column(db.String(255))
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
-
 
 # Interview Table
 class Interview(db.Model, SerializerMixin):
