@@ -2,10 +2,16 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
+
+admin = Admin(app, name='microblog', theme=Bootstrap4Theme(swatch='cerulean'))
+# Add administrative views here
+
 
 def create_app():
     app = Flask(__name__)

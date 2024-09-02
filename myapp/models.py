@@ -5,6 +5,7 @@ from sqlalchemy.orm import validates
 import re
 from sqlalchemy_serializer import SerializerMixin
 
+
 # User Table
 class User(db.Model, SerializerMixin):
     __tablename__ = 'user'
