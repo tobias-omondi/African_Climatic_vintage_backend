@@ -1,13 +1,15 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from datetime import datetime
+from sqlalchemy.orm import validates
+import re
+from sqlalchemy_serializer import SerializerMixin
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
 # User Table
-class User(db.Model):
-
+class User(db.Model, SerializerMixin):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -16,27 +18,45 @@ class User(db.Model):
     password = db.Column(db.String(128), nullable=False)
     subscription = db.Column(db.Boolean, default=False)
 
-# Admin Table
-class Admin(db.Model):
+    @validates('email')
+    def validate_email(self, key, email):
+        # Basic email validation
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            raise ValueError("Invalid email address")
+        return email
 
-    __tablename__ = 'Admin'
+    def set_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+
+
+# Admin Table
+class Admin(db.Model, SerializerMixin):
+    __tablename__ = 'admin'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(55), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    
 
-    # Relationship
-    news = db.relationship('News', backref = 'admin', lazy =True)
-    documentation = db.relationship('Documentation', backref = 'admin', lazy = True)
-    multimedia = db.relationship('Multimedia', backref = 'admin', lazy = True)
-    podcast = db.relationship('Podcast', backref = 'admin', lazy = True )
-    panel_discusion = db.relationship('Panel_Discusion', backref = 'admin' , lazy = True)
-    interview = db.relationship ('Interview', backref = 'admin' , lazy = True)
+    # Relationships
+    news = db.relationship('News', backref='admin', lazy=True)
+    documentation = db.relationship('Documentation', backref='admin', lazy=True)
+    multimedia = db.relationship('Multimedia', backref='admin', lazy=True)
+    podcast = db.relationship('Podcast', backref='admin', lazy=True)
+    panel_discussion = db.relationship('PanelDiscussion', backref='admin', lazy=True)
+    interview = db.relationship('Interview', backref='admin', lazy=True)
+
+    def set_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
 
 # News Table
-class News(db.Model):
-    __tablename__ = 'News'
+class News(db.Model, SerializerMixin):
+    __tablename__ = 'news'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -46,10 +66,16 @@ class News(db.Model):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-# Documentation Table
-class Documentation(db.Model):
+    @validates('title')
+    def validate_title(self, key, title):
+        if len(title) < 5:
+            raise ValueError("Title must be at least 5 characters long")
+        return title
 
-    __tablename__ = 'Documentation'
+
+# Documentation Table
+class Documentation(db.Model, SerializerMixin):
+    __tablename__ = 'documentation'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -61,10 +87,17 @@ class Documentation(db.Model):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-# Multimedia Table
-class Multimedia(db.Model):
+    @validates('content_type')
+    def validate_content_type(self, key, content_type):
+        allowed_types = ['PDF', 'DOC', 'DOCX']
+        if content_type.upper() not in allowed_types:
+            raise ValueError(f"Content type must be one of {', '.join(allowed_types)}")
+        return content_type
 
-    __tablename__ = 'Multimedia'
+
+# Multimedia Table
+class Multimedia(db.Model, SerializerMixin):
+    __tablename__ = 'multimedia'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -76,10 +109,17 @@ class Multimedia(db.Model):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-# Podcast Table
-class Podcast(db.Model):
+    @validates('content_type')
+    def validate_content_type(self, key, content_type):
+        allowed_types = ['image', 'video', 'audio']
+        if content_type.lower() not in allowed_types:
+            raise ValueError(f"Content type must be one of {', '.join(allowed_types)}")
+        return content_type
 
-    __tablename__ = 'Podcast'
+
+# Podcast Table
+class Podcast(db.Model, SerializerMixin):
+    __tablename__ = 'podcast'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -89,10 +129,10 @@ class Podcast(db.Model):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-# Panel Discussion Table
-class Panel_Discussion(db.Model):
 
-    __tablename__ = 'PanelDiscussion'
+# Panel Discussion Table
+class PanelDiscussion(db.Model, SerializerMixin):
+    __tablename__ = 'paneldiscussion'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -102,10 +142,11 @@ class Panel_Discussion(db.Model):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
 
-# Interview Table
-class Interview(db.Model):
 
-    __tablename__ = 'Interview'
+# Interview Table
+class Interview(db.Model, SerializerMixin):
+    __tablename__ = 'interview'
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)

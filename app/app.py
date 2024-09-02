@@ -3,14 +3,14 @@ from flask_restful import Resource, Api
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from app.main.model import User, News, Documentation, Panel_Discussion, Interview, Admin, Multimedia, Podcast, bcrypt
+from app.model import User, News, Documentation, PanelDiscussion, Interview, Admin, Multimedia, Podcast, bcrypt
 
 app = Flask(__name__)
 api = Api(app)
 
 # Configure SQLite database
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Africa climatic database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
