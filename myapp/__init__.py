@@ -6,6 +6,8 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_basicauth import BasicAuth
 from flask_login import LoginManager
+from .modelviews import UserAdminView
+
 
 db = SQLAlchemy()
 migrate = Migrate()

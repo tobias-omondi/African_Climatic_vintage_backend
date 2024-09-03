@@ -15,7 +15,7 @@ class UserAdminView (ModelView):
     # Add password field as a hidden field
 
     form_extra_rules = {
-        'password': passwordField('password')
+        'password': PasswordField('password')
     }
      # Customize how the password field is saved
     def on_model_change(self, form, model, is_created):
