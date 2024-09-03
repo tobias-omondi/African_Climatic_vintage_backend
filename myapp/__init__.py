@@ -52,7 +52,7 @@ def create_app():
     admin = Admin(app, name='microblog', template_mode='bootstrap4')
 
     # Add administrative views
-    admin.add_view(ModelView(User, db.session))
+    admin.add_view(UserAdminView(User, db.session))
     admin.add_view(ModelView(News, db.session))
     admin.add_view(ModelView(Documentation, db.session))
     admin.add_view(ModelView(Multimedia, db.session))
