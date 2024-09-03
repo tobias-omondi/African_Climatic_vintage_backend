@@ -3,18 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView # when to use when creating crud application for your database
-# from flask_admin.base import AdminIndexView
-# from flask_admin import form
-# from flask_admin import exposeS
+from flask_admin.contrib.sqla import ModelView
 from flask_basicauth import BasicAuth
+from flask_login import LoginManager
 
 db = SQLAlchemy()
 migrate = Migrate()
 bcrypt = Bcrypt()
-basic_auth = BasicAuth(app)
-
-
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
@@ -23,9 +19,16 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Africa_climatic_database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-       # Configure BasicAuth
+    # Configure BasicAuth
     app.config['BASIC_AUTH_USERNAME'] = 'admin'
     app.config['BASIC_AUTH_PASSWORD'] = 'password'
+    basic_auth = BasicAuth(app)
+
+    # Configure Flask-Login
+    app.config['SECRET_KEY'] = 'your_secret_key'  # Required for session management
+    login_manager.init_app(app)
+    login_manager.login_view = 'login'  # Specify the login route
+    login_manager.login_message_category = 'info'  # Flash message category
 
     # Initialize extensions
     db.init_app(app)
@@ -45,10 +48,10 @@ def create_app():
         myapp.models.Podcast,
     )
 
-    # Flask and Flask-SQLAlchemy initialization here
+    # Flask-Admin initialization
     admin = Admin(app, name='microblog', template_mode='bootstrap4')
-    
-    # Add administrative views here
+
+    # Add administrative views
     admin.add_view(ModelView(User, db.session))
     admin.add_view(ModelView(News, db.session))
     admin.add_view(ModelView(Documentation, db.session))
@@ -59,9 +62,6 @@ def create_app():
 
     # Create tables if they don't exist
     with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            print(f"Error creating tables: {e}")
+        db.create_all()
 
     return app

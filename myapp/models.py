@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import validates
 import re
 from sqlalchemy_serializer import SerializerMixin
+from flask_login import UserMixin
 
 
 # User Table
@@ -29,7 +30,7 @@ class User(db.Model, SerializerMixin):
         return bcrypt.check_password_hash(self.password, password)
 
 # Admin Table
-class Admin(db.Model, SerializerMixin):
+class Admin(db.Model, SerializerMixin, UserMixin):
     __tablename__ = 'admin'
 
     id = db.Column(db.Integer, primary_key=True)
