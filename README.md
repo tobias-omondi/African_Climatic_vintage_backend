@@ -45,14 +45,19 @@ source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
 pip install -r requirements.txt
 
-~### Initalizing Database
--**flask db init**:
-migratin creating
--**flask db migrate -m "Initial migration."**:
-applying migration
+# Initalizing Database
+flask db init:
+
+#migratin creating
+flask db migrate -m "Initial migration.":
+
+# applying migration
+
 -##flask db upgrade
 
-Running the Application
-To run the application, use the following command:
-bash
+# Running the Application
+# To run the application, use the following command:
+# bash
+
+
 flask run
