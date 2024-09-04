@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_login import login_user, logout_user, current_user, login_required
 from myapp import create_app, db, bcrypt
-from myapp.models import User, AdminUser
+from myapp.models import User, AdminUser, News, Documentation,Multimedia,Podcast, PanelDiscussion, Interview
 
 app = create_app()
 api = Api(app)
@@ -37,6 +37,370 @@ class UserResource(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
 api.add_resource(UserResource, '/user')
+
+class NewsResource(Resource):
+    # Create a new news item (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        image_url = data.get('image_url')
+        admin_id = data.get('admin_id')
+
+        if not title or not description:
+            return {"message": "Title and description are required"}, 400
+
+        new_news = News(
+            title=title,
+            description=description,
+            image_url=image_url,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_news)
+            db.session.commit()
+            return {"message": "News item created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing news item (PUT)
+    def put(self, news_id):
+        news_item = News.query.get_or_404(news_id)
+        data = request.get_json()
+
+        news_item.title = data.get('title', news_item.title)
+        news_item.description = data.get('description', news_item.description)
+        news_item.image_url = data.get('image_url', news_item.image_url)
+
+        try:
+            db.session.commit()
+            return {"message": "News item updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete a news item (DELETE)
+    def delete(self, news_id):
+        news_item = News.query.get_or_404(news_id)
+
+        try:
+            db.session.delete(news_item)
+            db.session.commit()
+            return {"message": "News item deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(NewsResource, '/news', '/news/<int:news_id>')
+
+class DocumentationResource(Resource):
+    # Create a new documentation item (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        content_type = data.get('content_type')
+        file_path = data.get('file_path')
+        file_url = data.get('file_url')
+        admin_id = data.get('admin_id')
+
+        if not title or not description:
+            return {"message": "Title and description are required"}, 400
+
+        new_documentation = Documentation(
+            title=title,
+            description=description,
+            content_type=content_type,
+            file_path=file_path,
+            file_url=file_url,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_documentation)
+            db.session.commit()
+            return {"message": "Documentation item created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing documentation item (PUT)
+    def put(self, doc_id):
+        documentation_item = Documentation.query.get_or_404(doc_id)
+        data = request.get_json()
+
+        documentation_item.title = data.get('title', documentation_item.title)
+        documentation_item.description = data.get('description', documentation_item.description)
+        documentation_item.content_type = data.get('content_type', documentation_item.content_type)
+        documentation_item.file_path = data.get('file_path', documentation_item.file_path)
+        documentation_item.file_url = data.get('file_url', documentation_item.file_url)
+
+        try:
+            db.session.commit()
+            return {"message": "Documentation item updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete a documentation item (DELETE)
+    def delete(self, doc_id):
+        documentation_item = Documentation.query.get_or_404(doc_id)
+
+        try:
+            db.session.delete(documentation_item)
+            db.session.commit()
+            return {"message": "Documentation item deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(DocumentationResource, '/documentation', '/documentation/<int:doc_id>')
+
+
+class MultimediaResource(Resource):
+    # Create a new multimedia item (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        content_type = data.get('content_type')
+        file_path = data.get('file_path')
+        file_url = data.get('file_url')
+        admin_id = data.get('admin_id')
+
+        if not title:
+            return {"message": "Title is required"}, 400
+
+        if not content_type:
+            return {"message": "Content type is required"}, 400
+
+        new_multimedia = Multimedia(
+            title=title,
+            description=description,
+            content_type=content_type,
+            file_path=file_path,
+            file_url=file_url,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_multimedia)
+            db.session.commit()
+            return {"message": "Multimedia item created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing multimedia item (PUT)
+    def put(self, multimedia_id):
+        multimedia_item = Multimedia.query.get_or_404(multimedia_id)
+        data = request.get_json()
+
+        multimedia_item.title = data.get('title', multimedia_item.title)
+        multimedia_item.description = data.get('description', multimedia_item.description)
+        multimedia_item.content_type = data.get('content_type', multimedia_item.content_type)
+        multimedia_item.file_path = data.get('file_path', multimedia_item.file_path)
+        multimedia_item.file_url = data.get('file_url', multimedia_item.file_url)
+
+        try:
+            db.session.commit()
+            return {"message": "Multimedia item updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete a multimedia item (DELETE)
+    def delete(self, multimedia_id):
+        multimedia_item = Multimedia.query.get_or_404(multimedia_id)
+
+        try:
+            db.session.delete(multimedia_item)
+            db.session.commit()
+            return {"message": "Multimedia item deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(MultimediaResource, '/multimedia', '/multimedia/<int:multimedia_id>')
+
+
+class PodcastResource(Resource):
+    # Create a new podcast (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        audio_url = data.get('audio_url')
+        admin_id = data.get('admin_id')
+
+        if not title or not audio_url:
+            return {"message": "Title and audio URL are required"}, 400
+
+        new_podcast = Podcast(
+            title=title,
+            description=description,
+            audio_url=audio_url,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_podcast)
+            db.session.commit()
+            return {"message": "Podcast created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing podcast (PUT)
+    def put(self, podcast_id):
+        podcast = Podcast.query.get_or_404(podcast_id)
+        data = request.get_json()
+
+        podcast.title = data.get('title', podcast.title)
+        podcast.description = data.get('description', podcast.description)
+        podcast.audio_url = data.get('audio_url', podcast.audio_url)
+
+        try:
+            db.session.commit()
+            return {"message": "Podcast updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete a podcast (DELETE)
+    def delete(self, podcast_id):
+        podcast = Podcast.query.get_or_404(podcast_id)
+
+        try:
+            db.session.delete(podcast)
+            db.session.commit()
+            return {"message": "Podcast deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(PodcastResource, '/podcast', '/podcast/<int:podcast_id>')
+
+
+class PanelDiscussionResource(Resource):
+    # Create a new panel discussion (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        panel_list = data.get('panel_list')
+        video_file_path = data.get('video_file_path')
+        admin_id = data.get('admin_id')
+
+        if not title:
+            return {"message": "Title is required"}, 400
+
+        new_panel_discussion = PanelDiscussion(
+            title=title,
+            description=description,
+            panel_list=panel_list,
+            video_file_path=video_file_path,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_panel_discussion)
+            db.session.commit()
+            return {"message": "Panel Discussion created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing panel discussion (PUT)
+    def put(self, paneldiscussion_id):
+        panel_discussion = PanelDiscussion.query.get_or_404(paneldiscussion_id)
+        data = request.get_json()
+
+        panel_discussion.title = data.get('title', panel_discussion.title)
+        panel_discussion.description = data.get('description', panel_discussion.description)
+        panel_discussion.panel_list = data.get('panel_list', panel_discussion.panel_list)
+        panel_discussion.video_file_path = data.get('video_file_path', panel_discussion.video_file_path)
+
+        try:
+            db.session.commit()
+            return {"message": "Panel Discussion updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete a panel discussion (DELETE)
+    def delete(self, paneldiscussion_id):
+        panel_discussion = PanelDiscussion.query.get_or_404(paneldiscussion_id)
+
+        try:
+            db.session.delete(panel_discussion)
+            db.session.commit()
+            return {"message": "Panel Discussion deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(PanelDiscussionResource, '/panel-discussion', '/panel-discussion/<int:paneldiscussion_id>')
+
+class InterviewResource(Resource):
+    # Create a new interview item (POST)
+    def post(self):
+        data = request.get_json()
+        title = data.get('title')
+        description = data.get('description')
+        image_url = data.get('image_url')
+        admin_id = data.get('admin_id')
+
+        if not title or not image_url:
+            return {"message": "Title and image_url are required"}, 400
+
+        new_interview = Interview(
+            title=title,
+            description=description,
+            image_url=image_url,
+            admin_id=admin_id
+        )
+
+        try:
+            db.session.add(new_interview)
+            db.session.commit()
+            return {"message": "Interview item created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Update an existing interview item (PUT)
+    def put(self, interview_id):
+        interview_item = Interview.query.get_or_404(interview_id)
+        data = request.get_json()
+
+        interview_item.title = data.get('title', interview_item.title)
+        interview_item.description = data.get('description', interview_item.description)
+        interview_item.image_url = data.get('image_url', interview_item.image_url)
+
+        try:
+            db.session.commit()
+            return {"message": "Interview item updated successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Delete an interview item (DELETE)
+    def delete(self, interview_id):
+        interview_item = Interview.query.get_or_404(interview_id)
+
+        try:
+            db.session.delete(interview_item)
+            db.session.commit()
+            return {"message": "Interview item deleted successfully"}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(InterviewResource, '/interview', '/interview/<int:interview_id>')
+
 
 # New Admin Resources
 class AdminLogin(Resource):
