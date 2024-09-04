@@ -423,6 +423,29 @@ class AdminLogin(Resource):
 
 api.add_resource(AdminLogin, '/admin/login')
 
+class CreateAdmin(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+
+        if not username or not password:
+            return {"message": "Username and password are required"}, 400
+
+        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+        try:
+            new_admin = AdminUser(username=username, password=hashed_password, is_admin=True)
+            db.session.add(new_admin)
+            db.session.commit()
+            return {"message": "Admin user created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
+
+api.add_resource(CreateAdmin, '/admin/create')
+
+
 class AuthStatus(Resource):
     def get(self):
         if current_user.is_authenticated:
@@ -436,6 +459,32 @@ class AuthStatus(Resource):
         return {'isAuthenticated': False}, 200
 
 api.add_resource(AuthStatus, '/auth/status')
+
+class ChangePassword(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+
+        if not username or not current_password or not new_password:
+            return {"message": "Missing required fields: username, current_password, or new_password"}, 400
+
+        # Fetch the admin user
+        admin_user = AdminUser.query.filter_by(username=username).first()
+        if not admin_user:
+            return {"message": "User not found"}, 404
+
+        # Check if the current password is correct
+        if not bcrypt.check_password_hash(admin_user.password, current_password):
+            return {"message": "Current password is incorrect"}, 401
+
+        # Set the new password
+        admin_user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        db.session.commit()
+        return {"message": "Password updated successfully"}, 200
+
+api.add_resource(ChangePassword, '/admin/change-password')
 
 
 if __name__ == '__main__':
