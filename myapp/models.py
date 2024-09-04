@@ -32,12 +32,12 @@ class AdminUser(db.Model, SerializerMixin, UserMixin):
     password = db.Column(db.String(128), nullable=False)
 
     # Relationships
-    news = db.relationship('News', backref='admin_user', lazy=True)
-    documentation = db.relationship('Documentation', backref='admin_user', lazy=True)
-    multimedia = db.relationship('Multimedia', backref='admin_user', lazy=True)
-    podcast = db.relationship('Podcast', backref='admin_user', lazy=True)
-    panel_discussion = db.relationship('PanelDiscussion', backref='admin_user', lazy=True)
-    interview = db.relationship('Interview', backref='admin_user', lazy=True)
+    news = db.relationship('News', backref='admin', lazy=True)
+    documentation = db.relationship('Documentation', backref='admin', lazy=True)
+    multimedia = db.relationship('Multimedia', backref='admin', lazy=True)
+    podcast = db.relationship('Podcast', backref='admin', lazy=True)
+    panel_discussion = db.relationship('PanelDiscussion', backref='admin', lazy=True)
+    interview = db.relationship('Interview', backref='admin', lazy=True)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
@@ -58,11 +58,7 @@ class News(db.Model, SerializerMixin):
     image_url = db.Column(db.String(2000))
     date_posted = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    # Relationship
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
-
-        # Relationship
-    admin = db.relationship('AdminUser', backref='news', lazy=True)
 
     @validates('title')
     def validate_title(self, key, title):
@@ -83,9 +79,6 @@ class Documentation(db.Model, SerializerMixin):
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
-
-        # Relationship
-    admin = db.relationship('AdminUser', backref='documentation', lazy=True)
 
     @validates('content_type')
     def validate_content_type(self, key, content_type):
@@ -108,9 +101,6 @@ class Multimedia(db.Model, SerializerMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
 
-       # Relationship
-    admin = db.relationship('AdminUser', backref='multmedia', lazy=True)
-
     @validates('content_type')
     def validate_content_type(self, key, content_type):
         allowed_types = ['image', 'video', 'audio']
@@ -130,9 +120,6 @@ class Podcast(db.Model, SerializerMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
 
-      # Relationship
-    admin = db.relationship('AdminUser', backref='podcast', lazy=True)
-
 # Panel Discussion Table
 class PanelDiscussion(db.Model, SerializerMixin):
     __tablename__ = 'paneldiscussion'
@@ -145,9 +132,6 @@ class PanelDiscussion(db.Model, SerializerMixin):
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
 
-    # Relationship
-    admin = db.relationship('AdminUser', backref='paneldiscussion')
-
 # Interview Table
 class Interview(db.Model, SerializerMixin):
     __tablename__ = 'interview'
@@ -158,6 +142,3 @@ class Interview(db.Model, SerializerMixin):
     image_url = db.Column(db.String(255), nullable=False)
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
-
-   # Relationship
-    admin = db.relationship('AdminUser', backref='interviews')
