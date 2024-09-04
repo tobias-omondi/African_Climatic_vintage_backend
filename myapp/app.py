@@ -15,23 +15,27 @@ api.add_resource(HelloWorld, '/')
 class UserResource(Resource):
     def post(self):
         data = request.get_json()
+
+        # Extract required fields
         full_name = data.get('full_name')
         email = data.get('email')
-        password = data.get('password')
-        subscription = data.get('subscription')
+        message = data.get('message')
 
-        if full_name and email and password and subscription:
-            new_user = User(full_name=full_name, email=email, password=password, subscription=subscription)
+        # Check if all required fields are provided
+        if not full_name or not email or not message:
+            return {"message": "Missing required fields: full_name, email, or message"}, 400
 
-            try:
-                db.session.add(new_user)
-                db.session.commit()
-                return {"message": "User created successfully"}, 201
-            except Exception as e:
-                db.session.rollback()
-                return {"message": f"An error occurred: {str(e)}"}, 500
-        else:
-            return {"message": "Missing required fields"}, 400
+        # Create a new User instance
+        new_user = User(full_name=full_name, email=email, message=message)
+
+        try:
+            # Add the new user to the database
+            db.session.add(new_user)
+            db.session.commit()
+            return {"message": "User created successfully"}, 201
+        except Exception as e:
+            db.session.rollback()
+            return {"message": f"An error occurred: {str(e)}"}, 500
 
 api.add_resource(UserResource, '/user')
 

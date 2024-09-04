@@ -1,11 +1,9 @@
-# models.py
-from myapp import db, bcrypt
 from datetime import datetime
 from sqlalchemy.orm import validates
 import re
-from sqlalchemy_serializer import SerializerMixin
 from flask_login import UserMixin
-
+from sqlalchemy_serializer import SerializerMixin
+from myapp import db, bcrypt
 
 # User Table
 class User(db.Model, SerializerMixin):
@@ -14,8 +12,7 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(55), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(128), nullable=False)
-    subscription = db.Column(db.Boolean, default=False)
+    message = db.Column(db.String(1000), nullable=False)
 
     @validates('email')
     def validate_email(self, key, email):
@@ -23,32 +20,33 @@ class User(db.Model, SerializerMixin):
             raise ValueError("Invalid email address")
         return email
 
-    def set_password(self, password):
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    def __repr__(self):
+        return '<User %r>' % (self.full_name)
 
-    def check_password(self, password):
-        return bcrypt.check_password_hash(self.password, password)
-
-# Admin Table
-class Admin(db.Model, SerializerMixin, UserMixin):
-    __tablename__ = 'admin'
+# Admin User Table
+class AdminUser(db.Model, SerializerMixin, UserMixin):
+    __tablename__ = 'admin_user'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(55), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
 
-    news = db.relationship('News', backref='admin', lazy=True)
-    documentation = db.relationship('Documentation', backref='admin', lazy=True)
-    multimedia = db.relationship('Multimedia', backref='admin', lazy=True)
-    podcast = db.relationship('Podcast', backref='admin', lazy=True)
-    panel_discussion = db.relationship('PanelDiscussion', backref='admin', lazy=True)
-    interview = db.relationship('Interview', backref='admin', lazy=True)
+    # Relationships
+    news = db.relationship('News', backref='admin_user', lazy=True)
+    documentation = db.relationship('Documentation', backref='admin_user', lazy=True)
+    multimedia = db.relationship('Multimedia', backref='admin_user', lazy=True)
+    podcast = db.relationship('Podcast', backref='admin_user', lazy=True)
+    panel_discussion = db.relationship('PanelDiscussion', backref='admin_user', lazy=True)
+    interview = db.relationship('Interview', backref='admin_user', lazy=True)
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
+
+    def __repr__(self):
+        return '<AdminUser %r>' % (self.username)
 
 # News Table
 class News(db.Model, SerializerMixin):
@@ -60,7 +58,11 @@ class News(db.Model, SerializerMixin):
     image_url = db.Column(db.String(2000))
     date_posted = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    # Relationship
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+        # Relationship
+    admin = db.relationship('AdminUser', backref='news', lazy=True)
 
     @validates('title')
     def validate_title(self, key, title):
@@ -75,12 +77,15 @@ class Documentation(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    content_type = db.Column(db.String(50), nullable=False)  # E.g., 'PDF', 'DOC'
-    file_path = db.Column(db.String(255))
+    content_type = db.Column(db.String(50), nullable=True)  # E.g., 'PDF', 'DOC'
+    file_path = db.Column(db.String(255), nullable=True)
     file_url = db.Column(db.String(255))
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+        # Relationship
+    admin = db.relationship('AdminUser', backref='documentation', lazy=True)
 
     @validates('content_type')
     def validate_content_type(self, key, content_type):
@@ -96,12 +101,15 @@ class Multimedia(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
-    content_type = db.Column(db.String(50), nullable=False)  # E.g., 'image', 'video'
-    file_path = db.Column(db.String(255))
+    content_type = db.Column(db.String(255), nullable=True)  # E.g., 'image', 'video'
+    file_path = db.Column(db.String(255), nullable=True)
     file_url = db.Column(db.String(255))
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+       # Relationship
+    admin = db.relationship('AdminUser', backref='multmedia', lazy=True)
 
     @validates('content_type')
     def validate_content_type(self, key, content_type):
@@ -120,7 +128,10 @@ class Podcast(db.Model, SerializerMixin):
     audio_url = db.Column(db.String(255), nullable=False)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+      # Relationship
+    admin = db.relationship('AdminUser', backref='podcast', lazy=True)
 
 # Panel Discussion Table
 class PanelDiscussion(db.Model, SerializerMixin):
@@ -132,7 +143,10 @@ class PanelDiscussion(db.Model, SerializerMixin):
     panel_list = db.Column(db.Text)  # List of panelists, can be stored as a string or JSON
     video_file_path = db.Column(db.String(255))
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+    # Relationship
+    admin = db.relationship('AdminUser', backref='paneldiscussion')
 
 # Interview Table
 class Interview(db.Model, SerializerMixin):
@@ -143,4 +157,7 @@ class Interview(db.Model, SerializerMixin):
     description = db.Column(db.Text)
     image_url = db.Column(db.String(255), nullable=False)
 
-    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
+
+   # Relationship
+    admin = db.relationship('AdminUser', backref='interviews')
