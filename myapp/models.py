@@ -30,6 +30,7 @@ class AdminUser(db.Model, SerializerMixin, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(55), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=True) 
 
     # Relationships
     news = db.relationship('News', backref='admin', lazy=True)
