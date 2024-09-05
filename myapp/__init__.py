@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_admin import Admin as FlaskAdmin
 from flask_admin.contrib.sqla import ModelView
 import os
+from flask_cors import CORS
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -16,6 +17,7 @@ admin = FlaskAdmin()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     # Configure app
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Africa_climatic_database.db'

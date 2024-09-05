@@ -4,9 +4,9 @@ from flask_login import login_user, logout_user, current_user, login_required
 from myapp import create_app, db, bcrypt
 from myapp.models import User, AdminUser, News, Documentation,Multimedia,Podcast, PanelDiscussion, Interview
 
+
 app = create_app()
 api = Api(app)
-
 # Existing HelloWorld and UserResource
 
 class HelloWorld(Resource):
@@ -398,6 +398,7 @@ class InterviewResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
+            
 
 api.add_resource(InterviewResource, '/interview', '/interview/<int:interview_id>')
 
