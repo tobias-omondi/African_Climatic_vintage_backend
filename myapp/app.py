@@ -16,6 +16,16 @@ class HelloWorld(Resource):
 api.add_resource(HelloWorld, '/')
 
 class UserResource(Resource):
+    # Admin can view all users
+    @login_required
+    def get(self):
+        if current_user.is_admin:
+            users = User.query.all()  # Fetch all users
+            return jsonify([user.to_dict() for user in users])  # Assuming User model has a to_dict method
+        else:
+            return {"message": "Unauthorized access"}, 403
+
+    # Users can create a new account
     def post(self):
         data = request.get_json()
 
@@ -40,12 +50,16 @@ api.add_resource(UserResource, '/user')
 
 class NewsResource(Resource):
     # Create a new news item (POST)
+    @login_required
     def post(self):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         data = request.get_json()
         title = data.get('title')
         description = data.get('description')
         image_url = data.get('image_url')
-        admin_id = data.get('admin_id')
+        admin_id = current_user.id  # Assuming current_user is an admin
 
         if not title or not description:
             return {"message": "Title and description are required"}, 400
@@ -66,7 +80,11 @@ class NewsResource(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
     # Update an existing news item (PUT)
+    @login_required
     def put(self, news_id):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         news_item = News.query.get_or_404(news_id)
         data = request.get_json()
 
@@ -82,7 +100,11 @@ class NewsResource(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
     # Delete a news item (DELETE)
+    @login_required
     def delete(self, news_id):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         news_item = News.query.get_or_404(news_id)
 
         try:
@@ -93,18 +115,32 @@ class NewsResource(Resource):
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
 
+    # Get all news items (GET)
+    def get(self):
+        news_items = News.query.all()
+        return jsonify([{
+            'id': news_item.id,
+            'title': news_item.title,
+            'description': news_item.description,
+            'image_url': news_item.image_url
+        } for news_item in news_items])
+
 api.add_resource(NewsResource, '/news', '/news/<int:news_id>')
 
 class DocumentationResource(Resource):
     # Create a new documentation item (POST)
+    @login_required
     def post(self):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         data = request.get_json()
         title = data.get('title')
         description = data.get('description')
         content_type = data.get('content_type')
         file_path = data.get('file_path')
         file_url = data.get('file_url')
-        admin_id = data.get('admin_id')
+        admin_id = current_user.id  # Use the current admin's ID
 
         if not title or not description:
             return {"message": "Title and description are required"}, 400
@@ -127,7 +163,11 @@ class DocumentationResource(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
     # Update an existing documentation item (PUT)
+    @login_required
     def put(self, doc_id):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         documentation_item = Documentation.query.get_or_404(doc_id)
         data = request.get_json()
 
@@ -145,7 +185,11 @@ class DocumentationResource(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
     # Delete a documentation item (DELETE)
+    @login_required
     def delete(self, doc_id):
+        if not current_user.is_admin:
+            return {"message": "Unauthorized access"}, 403
+        
         documentation_item = Documentation.query.get_or_404(doc_id)
 
         try:
@@ -155,6 +199,18 @@ class DocumentationResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
+
+    # Get all documentation items (GET)
+    def get(self):
+        documentation_items = Documentation.query.all()
+        return jsonify([{
+            'id': doc.id,
+            'title': doc.title,
+            'description': doc.description,
+            'content_type': doc.content_type,
+            'file_path': doc.file_path,
+            'file_url': doc.file_url
+        } for doc in documentation_items])
 
 api.add_resource(DocumentationResource, '/documentation', '/documentation/<int:doc_id>')
 
@@ -223,6 +279,18 @@ class MultimediaResource(Resource):
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
 
+          # Get all multimedia items (GET)
+    def get(self):
+        multimedia_items = Multimedia.query.all()
+        return jsonify([{
+            'id': multimedia.id,
+            'title': multimedia.title,
+            'description': multimedia.description,
+            'content_type': multimedia.content_type,
+            'file_path': multimedia.file_path,
+            'file_url': multimedia.file_url
+        } for multimedia in multimedia_items])
+
 api.add_resource(MultimediaResource, '/multimedia', '/multimedia/<int:multimedia_id>')
 
 
@@ -280,6 +348,16 @@ class PodcastResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
+
+            # Get all podcast items (GET)
+    def get(self):
+        podcast_items = Podcast.query.all()
+        return jsonify([{
+            'id': podcast.id,
+            'title': podcast.title,
+            'description': podcast.description,
+            'audio_url': podcast.audio_url
+        } for podcast in podcast_items])
 
 api.add_resource(PodcastResource, '/podcast', '/podcast/<int:podcast_id>')
 
@@ -342,6 +420,17 @@ class PanelDiscussionResource(Resource):
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
 
+            # Get all panel discussion items (GET)
+    def get(self):
+        panel_discussion_items = PanelDiscussion.query.all()
+        return jsonify([{
+            'id': panel_discussion.id,
+            'title': panel_discussion.title,
+            'description': panel_discussion.description,
+            'panel_list': panel_discussion.panel_list,
+            'video_file_path': panel_discussion.video_file_path
+        } for panel_discussion in panel_discussion_items])
+
 api.add_resource(PanelDiscussionResource, '/panel-discussion', '/panel-discussion/<int:paneldiscussion_id>')
 
 class InterviewResource(Resource):
@@ -354,7 +443,7 @@ class InterviewResource(Resource):
         admin_id = data.get('admin_id')
 
         if not title or not image_url:
-            return {"message": "Title and image_url are required"}, 400
+            return {"message": "Title and image URL are required"}, 400
 
         new_interview = Interview(
             title=title,
@@ -373,12 +462,12 @@ class InterviewResource(Resource):
 
     # Update an existing interview item (PUT)
     def put(self, interview_id):
-        interview_item = Interview.query.get_or_404(interview_id)
+        interview = Interview.query.get_or_404(interview_id)
         data = request.get_json()
 
-        interview_item.title = data.get('title', interview_item.title)
-        interview_item.description = data.get('description', interview_item.description)
-        interview_item.image_url = data.get('image_url', interview_item.image_url)
+        interview.title = data.get('title', interview.title)
+        interview.description = data.get('description', interview.description)
+        interview.image_url = data.get('image_url', interview.image_url)
 
         try:
             db.session.commit()
@@ -389,16 +478,25 @@ class InterviewResource(Resource):
 
     # Delete an interview item (DELETE)
     def delete(self, interview_id):
-        interview_item = Interview.query.get_or_404(interview_id)
+        interview = Interview.query.get_or_404(interview_id)
 
         try:
-            db.session.delete(interview_item)
+            db.session.delete(interview)
             db.session.commit()
             return {"message": "Interview item deleted successfully"}, 200
         except Exception as e:
             db.session.rollback()
             return {"message": f"An error occurred: {str(e)}"}, 500
             
+            # Get all interview items (GET)
+    def get(self):
+        interview_items = Interview.query.all()
+        return jsonify([{
+            'id': interview.id,
+            'title': interview.title,
+            'description': interview.description,
+            'image_url': interview.image_url
+        } for interview in interview_items])
 
 api.add_resource(InterviewResource, '/interview', '/interview/<int:interview_id>')
 

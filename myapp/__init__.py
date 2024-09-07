@@ -19,8 +19,10 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
+
     # Configure app
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///Africa_climatic_database.db'
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://acvnewso_acvnewso:-r6vDSQT21.r4s@localhost/acvnewso_Africa_climatic_database'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_default_secret_key')
     app.config['BASIC_AUTH_USERNAME'] = os.getenv('BASIC_AUTH_USERNAME', 'admin')

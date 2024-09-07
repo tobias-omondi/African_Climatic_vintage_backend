@@ -23,6 +23,14 @@ class User(db.Model, SerializerMixin):
     def __repr__(self):
         return '<User %r>' % (self.full_name)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'full_name': self.full_name,
+            'email': self.email,
+            'message': self.message
+        }
+
 # Admin User Table
 class AdminUser(db.Model, SerializerMixin, UserMixin):
     __tablename__ = 'admin_user'
