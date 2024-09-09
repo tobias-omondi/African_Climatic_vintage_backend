@@ -3,10 +3,11 @@ from flask_restful import Resource, Api
 from flask_login import login_user, logout_user, current_user, login_required
 from myapp import create_app, db, bcrypt
 from myapp.models import User, AdminUser, News, Documentation,Multimedia,Podcast, PanelDiscussion, Interview
-
+from flask_cors import CORS
 
 app = create_app()
 api = Api(app)
+CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"])
 # Existing HelloWorld and UserResource
 
 class HelloWorld(Resource):
@@ -529,12 +530,15 @@ class CreateAdmin(Resource):
         password = data.get('password')
 
         if not username or not password:
-            return {"message": "Username and password are required"}, 400
+            return {"message": "Missing required fields: username or password"}, 400
+
+        if AdminUser.query.filter_by(username=username).first():
+            return {"message": "Admin user already exists"}, 400
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        new_admin = AdminUser(username=username, password=hashed_password)
 
         try:
-            new_admin = AdminUser(username=username, password=hashed_password, is_admin=True)
             db.session.add(new_admin)
             db.session.commit()
             return {"message": "Admin user created successfully"}, 201
@@ -543,6 +547,15 @@ class CreateAdmin(Resource):
             return {"message": f"An error occurred: {str(e)}"}, 500
 
 api.add_resource(CreateAdmin, '/admin/create')
+
+
+class AdminLogout(Resource):
+    @login_required
+    def post(self):
+        logout_user()
+        return {"message": "Logout successful"}, 200
+
+api.add_resource(AdminLogout, '/admin/logout')
 
 
 class AuthStatus(Resource):
