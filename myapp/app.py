@@ -302,6 +302,7 @@ class PodcastResource(Resource):
         title = data.get('title')
         description = data.get('description')
         audio_url = data.get('audio_url')
+        image_url_file = data.get('image_url_file')
         admin_id = data.get('admin_id')
 
         if not title or not audio_url:
@@ -330,6 +331,7 @@ class PodcastResource(Resource):
         podcast.title = data.get('title', podcast.title)
         podcast.description = data.get('description', podcast.description)
         podcast.audio_url = data.get('audio_url', podcast.audio_url)
+        podcast.image_url_file = data.get(' image_url_file', podcast. image_url_file)
 
         try:
             db.session.commit()
@@ -357,7 +359,8 @@ class PodcastResource(Resource):
             'id': podcast.id,
             'title': podcast.title,
             'description': podcast.description,
-            'audio_url': podcast.audio_url
+            'audio_url': podcast.audio_url,
+            'image_url_file': podcast.image_url_file
         } for podcast in podcast_items])
 
 api.add_resource(PodcastResource, '/podcast', '/podcast/<int:podcast_id>')

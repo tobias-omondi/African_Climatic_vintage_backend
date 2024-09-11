@@ -125,6 +125,7 @@ class Podcast(db.Model, SerializerMixin):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text)
     audio_url = db.Column(db.String(255), nullable=False)
+    image_url_file =db.Column(db.String(2000))
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     admin_id = db.Column(db.Integer, db.ForeignKey('admin_user.id'), nullable=True)
